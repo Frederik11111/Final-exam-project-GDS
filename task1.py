@@ -8,3 +8,6 @@ import re
 nltk.download('punkt')
 nltk.download('stopwords')
 
+data = pd.read_csv('fakenews_sample.csv')
+data.head()
+
