@@ -58,18 +58,50 @@ vocab = set(all_words_list)
 # Længden af vocab
 vocab_size = len(vocab)
 
+# Set af engelske stopwords
+english_stopwords = set(stopwords.words('english'))
 
+# Print antal stopwords og de første 15 stopwords
+print(f"Number of stopwords: {len(english_stopwords)}")
+print(list(english_stopwords)[:15]) # Display first 15 stopwords
 
+# Fjern stopwords fra tokens og gem det i en ny kolonne 'filtered_tokens'
+readUrl['filtered_tokens'] = readUrl['tokens'].apply(lambda tokens: [word for word in tokens if word not in english_stopwords])
+# Vis de første 5 rækker af tokens og filtered_tokens for at se forskellen
+readUrl[['tokens', 'filtered_tokens']].head() 
 
+# Liste over alle filtrerede ord i alle artikler
+filtered_words_list = [word for tokens_list in readUrl['filtered_tokens'] for word in tokens_list]
 
+# Sæt af unikke ord (vocab) og beregn vocab size
+vocab_filtered = set(filtered_words_list)
 
-print(f"Antal tokens i alt (alle ord i alle artikler): {len(all_words_list)}")
-print(f"Vocabulary size (unikke ord): {vocab_size}")
-print(f"10 ord i the vocab (bare lige for at se): {list(vocab)[:10]}")
+# Længden af vocab
+filtered_vocab_size = len(vocab_filtered)
 
+# Stemming
+ps = PorterStemmer()
 
+# Anvend stemming på de filtrerede tokens og gem det i en ny kolonne 'stemmed'
+readUrl['stemmed'] = readUrl['filtered_tokens'].apply(
+    lambda x: [ps.stem(w) if not w.startswith('<') else w for w in x]
+)
 
+# Liste over alle stemmede ord i alle artikler
+all_stemmed_words = [word for sublist in readUrl['stemmed'] for word in sublist]
 
+# Sæt af unikke stemmede ord (vocab) og beregn vocab size
+vocab_stemmed = set(all_stemmed_words)
+vocab_stemmed_size = len(vocab_stemmed)
 
+# Reduktion efter stopwords i forhold til baseline
+reduction_stop = (1 - (filtered_vocab_size / vocab_size)) * 100
 
+# Reduktion efter stemming i forhold til efter stopwords
+reduction_stem = (1 - (vocab_stemmed_size / filtered_vocab_size)) * 100
 
+# PRINT RESULTATER 
+print(f"\n--- STATISTIK FOR TASK 1 ---")
+print(f"Oprindelig Vocab Size: {vocab_size}")
+print(f"Vocab Size efter Stopwords: {filtered_vocab_size} (Reduktion: {reduction_stop:.2f}%)")
+print(f"Vocab Size efter Stemming: {vocab_stemmed_size} (Reduktion: {reduction_stem:.2f}%)")
