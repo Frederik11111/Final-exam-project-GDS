@@ -105,3 +105,5 @@ print(f"\n--- STATISTIK FOR TASK 1 ---")
 print(f"Oprindelig Vocab Size: {vocab_size}")
 print(f"Vocab Size efter Stopwords: {filtered_vocab_size} (Reduktion: {reduction_stop:.2f}%)")
 print(f"Vocab Size efter Stemming: {vocab_stemmed_size} (Reduktion: {reduction_stem:.2f}%)")
+
+
