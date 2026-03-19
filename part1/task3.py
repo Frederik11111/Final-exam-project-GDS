@@ -3,15 +3,18 @@ import re
 import matplotlib.pyplot as plt
 from collections import Counter
 
-print("Indlæser datasæt (dette kan tage lidt tid)...")
+print("Indlæser datasæt - vær tålmodig...")
+
+# Indlæser den processerede CSV-fil
 df = pd.read_csv("processed_995K.csv", usecols=['type', 'domain', 'authors', 'content', 'content_cleaned', 'stemmed'])
 
+ # Håndter manglende værdier i de relevante kolonner
 df['content'] = df['content'].fillna('')
 df['content_cleaned'] = df['content_cleaned'].fillna('')
 df['stemmed'] = df['stemmed'].fillna('')
 
 print("\n" + "="*60)
-print("DEL 1: METADATA & ARTEFAKTER (URLs, Dates, Numbers)")
+print("Del 1: URLs, Dates, Numbers")
 print("="*60)
 
 
@@ -23,15 +26,15 @@ print(f"Totalt antal URL'er i datasættet:   {url_count:,.0f}")
 print(f"Totalt antal Datoer i datasættet:   {date_count:,.0f}")
 print(f"Totalt antal Tal-værdier:           {num_count:,.0f}")
 
-# Frigør RAM ved at slette den rå content-kolonne, da vi ikke skal bruge den mere
+# Frigør RAM ved at slette den rå content-kolonne
 del df['content']
 
 
 print("\n" + "="*60)
-print("DEL 2: SAMMENLIGNING AF FAKE VS. RELIABLE")
+print("Del 2: sammenligning af Fake vs. Reliable News")
 print("="*60)
 
-
+# Definer hvilke labels der er fake news
 fake_labels = ['fake', 'political', 'bias', 'conspiracy', 'satire', 'rumor', 'unknown', 'clickbait', 'unreliable', 'junksci', 'hate']
 fake_news = df[df['type'].isin(fake_labels)]
 real_news = df[df['type'] == 'reliable']
@@ -45,10 +48,12 @@ def calculate_text_stats(text):
     ttr = len(set(words)) / word_count
     return word_count, ttr
 
-print("Beregner ordantal og leksikalsk rigdom (TTR)...")
+print("Beregner ordantal og TTR..")
+
+# Anvend funktionen på både 'content_cleaned' og 'stemmed' kolonnerne
 df['word_count'], df['ttr'] = zip(*df['content_cleaned'].apply(calculate_text_stats))
 
-# Opdater vores fake/real dataframes med de nye kolonner
+# Opdater vores fake/reliable dataframes med de nye kolonner
 fake_news = df[df['type'].isin(fake_labels)]
 real_news = df[df['type'] == 'reliable']
 
@@ -56,7 +61,7 @@ print(f"Gennemsnitlig artikellængde (ord):")
 print(f" - Fake News:     {fake_news['word_count'].mean():.0f} ord")
 print(f" - Reliable News: {real_news['word_count'].mean():.0f} ord")
 
-print(f"\nGennemsnitlig TTR (Leksikalsk rigdom):")
+print(f"\nGennemsnitlig TTR:")
 print(f" - Fake News:     {fake_news['ttr'].mean():.4f}")
 print(f" - Reliable News: {real_news['ttr'].mean():.4f}")
 
@@ -75,7 +80,7 @@ print(f" - De top 10 mest aktive domæner producerer {top_10_fake_pct:.1f}% af a
 
 
 print("\n" + "="*60)
-print("DEL 3: ORDFREKVENSER & ZIPF'S LOV")
+print("Del 3: Ordfrekvenser & Zipf's lov")
 print("="*60)
 
 # Funktion til at tælle ord
@@ -90,19 +95,23 @@ def get_word_counts(series, is_list_string=False):
         counter.update(words)
     return counter
 
+
+# Tæl ord før og efter rensning
 print("Tæller ord FØR stopwords & stemming...")
 counter_before = get_word_counts(df['content_cleaned'], is_list_string=False)
 
 print("Tæller ord EFTER stopwords & stemming...")
 counter_after = get_word_counts(df['stemmed'], is_list_string=True)
 
+
+# Tæl ord og vis de 10 mest hyppige ord før og efter rensning
 print("\nDe 10 mest hyppige ord FØR rensning:")
 print([word for word, count in counter_before.most_common(10)])
 
 print("\nDe 10 mest hyppige ord EFTER rensning:")
 print([word for word, count in counter_after.most_common(10)])
 
-# --- PLOT ZIPF'S LOV ---
+# PLOT ZIPF'S LOV - log-log plot af ordfrekvens vs. rang
 print("\nGenererer Zipf's Law plots (luk graf-vinduet for at afslutte scriptet)...")
 
 freq_before = [count for word, count in counter_before.most_common(10000)]

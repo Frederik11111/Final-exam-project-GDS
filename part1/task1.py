@@ -16,29 +16,29 @@ readUrl = pd.read_csv(url)
 
 # Hjælperfunktion til at strukturere og rense teksten. 
 def clean_text(text):
-    # 1. Håndter tomme værdier (vigtigt for det store datasæt)
+    # Håndter tomme værdier 
     if pd.isna(text):
         return ""
     
-    # 2. Gør alt til små bogstaver
+    # Gør alt til små bogstaver
     text = text.lower()
 
-    # 3. Erstat URLs med et tag (bevarer information om at der var et link)
+    # Erstat URLs med et tag 
     text = re.sub(r'https?://\S+|www\.\S+', '<URL>', text)
 
-    # 4. Erstat e-mails med et tag
+    # Erstat e-mails med et tag
     text = re.sub(r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b', '<EMAIL>', text)
 
-    # 5. Erstat datoer (f.eks. 13th) med et tag
+    # Erstat datoer med et tag
     text = re.sub(r'[0-9]+[a-zA-Z]+', '<DATE>', text)
 
-    # 6. Erstat resterende tal med et tag
+    # Erstat resterende tal med et tag
     text = re.sub(r'[0-9]+', '<NUM>', text)
     
-    # 7. Fjern specialtegn (behold kun bogstaver, tags og mellemrum)
+    # Fjern specialtegn 
     text = re.sub(r'[^a-z\s<>]', '', text)
     
-    # 8. Fjern ekstra mellemrum, tabs og linjeskift
+    # Fjern ekstra mellemrum, tabs og linjeskift
     text = re.sub(r'\s+', ' ', text).strip()
     
     return text
