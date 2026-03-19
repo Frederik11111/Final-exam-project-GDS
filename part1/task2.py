@@ -12,7 +12,7 @@ nltk.download('stopwords')
 # load csv filen 
 input_file = "995K_rows.csv"
 
-# den processerede fil
+# output den processerede fil
 output_file = "processed_995K.csv"
 
 # hvor mange chunks den skal læse ad gangern
@@ -26,16 +26,16 @@ ps = PorterStemmer()
 def clean_text(text):
     if pd.isna(text): 
         return ""
-    # 1. Lowercase
+    # Lowercase
     text = text.lower()
-    # 2. Tags for specielle mønstre
+    # Tags for specielle mønstre
     text = re.sub(r'https?://\S+|www\.\S+', '<URL>', text)
     text = re.sub(r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b', '<EMAIL>', text)
     text = re.sub(r'[0-9]+[a-zA-Z]+', '<DATE>', text)
     text = re.sub(r'[0-9]+', '<NUM>', text)
-    # 3. Fjern specialtegn (behold tags og bogstaver)
+    # Fjern specialtegn (behold tags og bogstaver)
     text = re.sub(r'[^a-z\s<>]', '', text)
-    # 4. Rens whitespace
+    # Rens whitespace
     text = re.sub(r'\s+', ' ', text).strip()
     return text
 
